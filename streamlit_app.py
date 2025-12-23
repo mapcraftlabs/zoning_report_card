@@ -592,7 +592,7 @@ bedroom_counts = ["0 bedrooms", "1 bedroom", "2 bedrooms", "3+ bedrooms"]
 parking_types = ["Surface", "Garage", "Podium", "Structured", "Underground"]
 
 # Chart 1: Total Feasibility
-st.title("Market-Feasible Units Dashboard Test")
+st.title("Market-Feasible Units Dashboard")
 total_data_dict = {"Total Units": [], "Affordable Units": []}
 scenario_names = []
 for data in all_data:
