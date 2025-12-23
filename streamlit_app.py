@@ -505,7 +505,7 @@ def create_location_grouped_chart(all_data, location_configs, include_total=True
 # Main Dashboard
 # ============================================================================
 
-st.set_page_config(page_title="Market-Feasible Units Dashboard", layout="wide")
+st.set_page_config(page_title="Market-Feasible Units Dashboard Test", layout="wide")
 
 # Check for CSV URL parameters
 params = st.query_params
