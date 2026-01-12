@@ -2,10 +2,45 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from urllib.parse import unquote
+import requests
+import io
 
 # ============================================================================
 # Data Loading Functions
 # ============================================================================
+
+
+def fetch_data_from_api(simulation_ids, project_id):
+    """
+    Fetch aggregation data from the MapCraft API for multiple simulation IDs.
+
+    Args:
+        simulation_ids: List of simulation IDs to fetch
+        project_id: The project ID to fetch data for
+
+    Returns:
+        Dictionary containing the CSV data or None if error
+    """
+    try:
+        url = f"https://api.mapcraft.io/simulations/full_aggregations/{project_id}"
+        response = requests.post(
+            url, json={"simulation_ids": simulation_ids}, timeout=30
+        )
+
+        if response.status_code != 200:
+            st.error(
+                f"API request failed with status {response.status_code}: {response.text}"
+            )
+            return None
+
+        return response.json()
+
+    except Exception as e:
+        st.error(f"Error fetching data from API: {e}")
+        import traceback
+
+        st.error(traceback.format_exc())
+        return None
 
 
 def load_data_from_aggregation_csv(url, scenario_name):
@@ -507,60 +542,53 @@ def create_location_grouped_chart(all_data, location_configs, include_total=True
 
 st.set_page_config(page_title="Market-Feasible Units Dashboard", layout="wide")
 
-# Check for CSV URL parameters
+# Check for simulation ID parameters
 params = st.query_params
 
-urls = {
-    "apply_zoning": "https://storage.googleapis.com/mapcraftlabs.appspot.com/labs_data/StandardCalifornia/simulations/-Ogiwnj-fYy4wjWPOn8-/aggregations/full_aggregations.csv?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=mapcraftlabs%40appspot.gserviceaccount.com%2F20251218%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251218T005811Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=68e7acd3073a81f00b6ec564a7502d59032f314d0bd625fb14a38a57841b77e335ba02b5147e43f7b8f780a0451ce4262542f2d15f4a3cbb5add7386d7acad792ec7f206c5ae612b845c893bb78411436e2745a3553c27e55aba7554fcd1665c0041ac57c1728816523fe4d64c35a6648b4c8149286d17b568305013ea312e61bb37c7f9fb2fff08ab42ddeae36d8ae1c0203d827210e7450a7bd3b9188dd65711ad602eab57c9e0b79587eaa22ee0aa6ff3d8631fb5f6e4ef0d9c6f09bfb9563e6a7d7fccac08dc41e6e99633a871839cd7b45ef1cc0390ece3eb970c100cefde51bcd863ba4914e223aabf02cb1b4417ff71fc4a07623a7c92549879fc5861",
-    "ignore_zoning": "https://storage.googleapis.com/mapcraftlabs.appspot.com/labs_data/StandardCalifornia/simulations/-Ogiwo-hmQWX6i7THCN2/aggregations/full_aggregations.csv?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=mapcraftlabs%40appspot.gserviceaccount.com%2F20251218%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251218T005811Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=6eef358214e5942bb2ca35e415234e70d9f84d7f3a0dc3be28e9525f6ce11f8408b17371795bd60735be1b9b275a77855b4edffd463190ad1274f9561980be76af340efa133e3532e5549420bed28c854b2c2f3cef3aa06d10f6d724dd125e2e8e5892b897d9b697519fd77f1cb2448ce2868e2ea001ed4806b915963788f1dfdba722f793ee2316d5f5b5255a1ae0f12c8f39b261a58d3fca15fd88f4d573b9d85e01ffc0d91860dc36efe12a17f1c40e5ee2291fe3ce7fe3a387871e319b61b3f15bf8a2fbecafd4d36a35f563bc995a570e69c42cac8941501086ac2c266095f19a837e2b5f0af3f58035e4ed50760229b8cb8cae75ff2e21c1d41672590b",
-}
-
-default_unzoned_url = urls["ignore_zoning"]
-default_zoned_url = urls["apply_zoning"]
-
-# Load unzoned baseline
-unzoned_csv_url = (
-    unquote(params.get("unzoned_url"))
-    if params.get("unzoned_url")
-    else default_unzoned_url
-)
-
-# Load multiple zoned scenarios
-zoned_scenarios = []
-for i in range(1, 10):  # Support up to 9 scenarios
-    url_key = f"zoned_url_{i}"
-    url = params.get(url_key)
-    if url:
-        url = unquote(url)
-    elif not url and i < 3:
-        url = default_zoned_url
-    if url:
-        zoned_scenarios.append({"url": url, "name": f"Scenario {i}"})
-
-# Validate we have at least one URL
-if not unzoned_csv_url and not zoned_scenarios:
-    st.error(
-        "Data not found. Please provide 'unzoned_url' and/or 'zoned_url' query parameters."
-    )
+# Get project ID from query params
+project_id = params.get("project_id")
+if not project_id:
+    st.error("No project_id provided. Please provide a project_id in the URL.")
     st.info(
-        "Example: ?unzoned_url=https://example.com/unzoned.csv&zoned_url_1=https://example.com/zoned1.csv&zoned_url_2=https://example.com/zoned2.csv"
+        "Example: ?project_id=StandardCalifornia&simulation_ids=-Ogiwnj-fYy4wjWPOn8-,-Ogiwo-hmQWX6i7THCN2"
     )
     st.stop()
 
-# Load all data
+# Get simulation IDs from query params
+simulation_ids_param = params.get("simulation_ids")
+if not simulation_ids_param:
+    st.error("No simulation IDs provided. Please provide simulation IDs in the URL.")
+    st.info(
+        "Example: ?project_id=StandardCalifornia&simulation_ids=-Ogiwnj-fYy4wjWPOn8-,-Ogiwo-hmQWX6i7THCN2"
+    )
+    st.stop()
+
+# Split by comma if multiple IDs are provided
+simulation_ids = [sid.strip() for sid in simulation_ids_param.split(",")]
+
+# Fetch data from API
+api_response = fetch_data_from_api(simulation_ids, project_id)
+if not api_response:
+    st.error(
+        "Failed to fetch data from API. Please check your simulation IDs and try again."
+    )
+    st.stop()
+
+# Display API response for debugging
+st.write("API Response:", api_response)
+
+# Load all data from API response
 all_data = []
 
-# Load unzoned baseline first (will be leftmost in charts)
-if unzoned_csv_url:
-    unzoned_data = load_data_from_aggregation_csv(unzoned_csv_url, "Unzoned")
-    if unzoned_data:
-        all_data.append(unzoned_data)
-
-# Load all zoned scenarios
-for scenario in zoned_scenarios:
-    scenario_data = load_data_from_aggregation_csv(scenario["url"], scenario["name"])
-    if scenario_data:
-        all_data.append(scenario_data)
+# The API returns data as a dict with simulation IDs as keys
+# Each value is a list with one element containing the aggregation data
+for i, sim_id in enumerate(simulation_ids):
+    if sim_id in api_response:
+        # Get the list for this simulation ID and extract the first element
+        data_list = api_response[sim_id]
+        if data_list and len(data_list) > 0:
+            scenario_data = data_list[0]
+            all_data.append(scenario_data)
 
 # Check if we successfully loaded any data
 if not all_data:
@@ -595,8 +623,10 @@ parking_types = ["Surface", "Garage", "Podium", "Structured", "Underground"]
 st.title("Market-Feasible Units Dashboard")
 total_data_dict = {"Total Units": [], "Affordable Units": []}
 scenario_names = []
-for data in all_data:
-    scenario_names.append(data["scenario_name"])
+for i, data in enumerate(all_data):
+    # Set default scenario names if not provided in data
+    scenario_name = data.get("scenario_name", f"Scenario {i+1}")
+    scenario_names.append(scenario_name)
     total_data_dict["Total Units"].append(data["total_units"])
     total_data_dict["Affordable Units"].append(data["affordable_units"])
 
