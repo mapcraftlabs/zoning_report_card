@@ -723,35 +723,41 @@ def create_location_grouped_chart(all_data, location_configs, include_total=True
 
 st.set_page_config(page_title="Market-Feasible Units Dashboard", layout="wide")
 
-# Check for simulation ID parameters
-params = st.query_params
+try:
+    # Check for simulation ID parameters
+    params = st.query_params
 
-# Get project ID from query params
-project_id = params.get("project_id")
-if not project_id:
-    st.error("No project_id provided. Please provide a project_id in the URL.")
+    # Get project ID from query params
+    project_id = params.get("project_id")
+    if not project_id:
+        st.error("❌ No project_id provided")
+        st.info("**Please provide a project_id in the URL.**\n\n")
+        st.stop()
+
+    # Get simulation IDs from query params
+    simulation_ids_param = params.get("simulation_ids")
+    if not simulation_ids_param:
+        st.error("❌ No simulation IDs provided")
+        st.info("**Please provide simulation IDs in the URL.**\n\n")
+        st.stop()
+
+    # Split by comma if multiple IDs are provided
+    simulation_ids = [sid.strip() for sid in simulation_ids_param.split(",")]
+
+    # Fetch data from API
+    api_response = fetch_data_from_api(simulation_ids, project_id)
+    if not api_response:
+        st.error(
+            "Failed to fetch data from API. Please check your simulation IDs and try again."
+        )
+        st.stop()
+
+except Exception as e:
+    st.error("❌ An error occurred while loading the dashboard")
+    st.error(f"Error: {str(e)}")
     st.info(
-        "Example: ?project_id=StandardCalifornia&simulation_ids=-Ogiwnj-fYy4wjWPOn8-,-Ogiwo-hmQWX6i7THCN2"
-    )
-    st.stop()
-
-# Get simulation IDs from query params
-simulation_ids_param = params.get("simulation_ids")
-if not simulation_ids_param:
-    st.error("No simulation IDs provided. Please provide simulation IDs in the URL.")
-    st.info(
-        "Example: ?project_id=StandardCalifornia&simulation_ids=-Ogiwnj-fYy4wjWPOn8-,-Ogiwo-hmQWX6i7THCN2"
-    )
-    st.stop()
-
-# Split by comma if multiple IDs are provided
-simulation_ids = [sid.strip() for sid in simulation_ids_param.split(",")]
-
-# Fetch data from API
-api_response = fetch_data_from_api(simulation_ids, project_id)
-if not api_response:
-    st.error(
-        "Failed to fetch data from API. Please check your simulation IDs and try again."
+        "**Please ensure you provide both project_id and simulation_ids in the URL.**\n\n"
+        "Example: `?project_id=StandardCalifornia&simulation_ids=-Ogiwnj-fYy4wjWPOn8-,-Ogiwo-hmQWX6i7THCN2`"
     )
     st.stop()
 
