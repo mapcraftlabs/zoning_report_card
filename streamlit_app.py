@@ -2,10 +2,45 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from urllib.parse import unquote
+import requests
+import io
 
 # ============================================================================
 # Data Loading Functions
 # ============================================================================
+
+
+def fetch_data_from_api(simulation_ids, project_id):
+    """
+    Fetch aggregation data from the MapCraft API for multiple simulation IDs.
+
+    Args:
+        simulation_ids: List of simulation IDs to fetch
+        project_id: The project ID to fetch data for
+
+    Returns:
+        Dictionary containing the CSV data or None if error
+    """
+    try:
+        url = f"https://api.mapcraft.io/simulations/full_aggregations/{project_id}"
+        response = requests.post(
+            url, json={"simulation_ids": simulation_ids}, timeout=30
+        )
+
+        if response.status_code != 200:
+            st.error(
+                f"API request failed with status {response.status_code}: {response.text}"
+            )
+            return None
+
+        return response.json()
+
+    except Exception as e:
+        st.error(f"Error fetching data from API: {e}")
+        import traceback
+
+        st.error(traceback.format_exc())
+        return None
 
 
 def load_data_from_aggregation_csv(url, scenario_name):
@@ -198,6 +233,187 @@ def load_data_from_aggregation_csv(url, scenario_name):
 
     except Exception as e:
         st.error(f"Error loading CSV data from {url}: {e}")
+        import traceback
+
+        st.error(traceback.format_exc())
+        return None
+
+
+def process_aggregation_data(data_dict, scenario_name):
+    """
+    Process aggregation data from API response dict.
+
+    Args:
+        data_dict: Dictionary containing aggregation data
+        scenario_name: Name for this scenario
+
+    Returns:
+        Processed data dictionary with percentages and organized values
+    """
+    try:
+        # Helper to get value or 0
+        def get_value(key):
+            return data_dict.get(key, 0)
+
+        # Extract income bracket data
+        income_values = [
+            get_value("marketUnits050Sum"),
+            get_value("marketUnits51100Sum"),
+            get_value("marketUnits101150Sum"),
+            get_value("marketUnits151200Sum"),
+            get_value("marketUnits201250Sum"),
+            get_value("marketUnits251Sum"),
+        ]
+
+        total_income = sum(income_values)
+        income_pct = [
+            round(v / total_income * 100) if total_income > 0 else 0
+            for v in income_values
+        ]
+
+        # Extract bedroom count data
+        bedroom_values = [
+            get_value("countMarket0BrSum"),
+            get_value("countMarket1BrSum"),
+            get_value("countMarket2BrSum"),
+            get_value("countMarket3BrSum"),
+        ]
+
+        total_bedroom = sum(bedroom_values)
+        bedroom_pct = [
+            round(v / total_bedroom * 100) if total_bedroom > 0 else 0
+            for v in bedroom_values
+        ]
+
+        # Extract parking data
+        parking_values = [
+            get_value("surfaceParkingStallsSum"),
+            get_value("garageParkingStallsSum"),
+            get_value("podiumParkingStallsSum"),
+            get_value("structuredParkingStallsSum"),
+            get_value("undergroundParkingStallsSum"),
+        ]
+
+        total_parking = sum(parking_values)
+        parking_pct = [
+            round(v / total_parking * 100) if total_parking > 0 else 0
+            for v in parking_values
+        ]
+
+        # Extract density (DUA) data - land area by density ranges (in acres)
+        density_values = [
+            get_value("acresDuaLt10Sum"),  # <10 DUA
+            get_value("acresDua1025Sum"),  # 11-25 DUA (actually 10-25 in data)
+            get_value("acresDua2550Sum"),  # 26-50 DUA (actually 25-50 in data)
+            get_value("acresDua5075Sum"),  # 51-75 DUA (actually 50-75 in data)
+            get_value("acresDuaGt75Sum"),  # >75 DUA
+        ]
+
+        total_density_area = sum(density_values)
+        density_pct = [
+            round(v / total_density_area * 100, 1) if total_density_area > 0 else 0
+            for v in density_values
+        ]
+
+        # Extract FAR (bulk) data - land area by FAR ranges (in acres)
+        far_values = [
+            get_value("acresFarLtpt2Sum"),  # <0.2 FAR (display as <0.4)
+            get_value("acresFarPt2Pt6Sum"),  # 0.2-0.6 FAR (display as 0.4-0.6)
+            get_value("acresFarPt61Sum"),  # 0.6-1 FAR (display as 0.7-0.9)
+            get_value("acresFar12Sum"),  # 1-2 FAR (display as 1-4)
+            get_value("acresFar24Sum"),  # 2-4 FAR (display as 5-7)
+            get_value("acresFarGt4Sum"),  # >4 FAR (display as 8+)
+        ]
+
+        total_far_area = sum(far_values)
+        far_pct = [
+            round(v / total_far_area * 100, 1) if total_far_area > 0 else 0
+            for v in far_values
+        ]
+
+        # Extract units by type data
+        unit_type_values = [
+            get_value("unitsByTypeSFSum"),  # SF
+            get_value("unitsByTypeTHSum"),  # TH
+            get_value("unitsByTypePLEXSum"),  # PLEX
+            get_value("unitsByTypeMFSum"),  # MF
+        ]
+
+        total_unit_types = sum(unit_type_values)
+        unit_type_pct = [
+            round(v / total_unit_types * 100, 1) if total_unit_types > 0 else 0
+            for v in unit_type_values
+        ]
+
+        # Extract TCAC resource level data
+        tcac_values = [
+            get_value("unitsByTcacLowResourceSum"),  # Low
+            get_value("unitsByTcacModerateResourceSum"),  # Moderate
+            get_value("unitsByTcacHighResourceSum"),  # High
+            get_value("unitsByTcacHighestResourceSum"),  # Highest
+        ]
+
+        total_tcac = sum(tcac_values)
+        tcac_pct = [
+            round(v / total_tcac * 100, 1) if total_tcac > 0 else 0 for v in tcac_values
+        ]
+
+        # Extract location-based data
+        location_data = {
+            "fault_zone": get_value("unitsFaultZoneSum"),
+            "historic_district": get_value("unitsHistoricDistrictSum"),
+            "urbanized": get_value("unitsUrbanizedSum"),
+            "walkable": get_value("unitsWalkableSum"),
+            "near_transit": get_value("unitsNearTransitSum"),
+            "wui": get_value("unitsWuiSum"),
+        }
+
+        # Get totals
+        total_units = get_value("totalUnitsSum")
+        affordable_units = get_value("affordableUnitsSum")
+
+        # Extract fire hazard severity zone (FHSZ) data
+        fhsz_high = get_value("unitsFhszHighSum")
+        fhsz_very_high = get_value("unitsFhszVeryhighSum")
+        fhsz_no = total_units - fhsz_high - fhsz_very_high
+
+        fire_risk_values = [
+            fhsz_no,  # No fire risk
+            fhsz_high,  # High
+            fhsz_very_high,  # Very High
+        ]
+
+        total_fire_risk = sum(fire_risk_values)
+        fire_risk_pct = [
+            round(v / total_fire_risk * 100, 1) if total_fire_risk > 0 else 0
+            for v in fire_risk_values
+        ]
+
+        return {
+            "scenario_name": scenario_name,
+            "income_values": [round(v, 1) for v in income_values],
+            "income_pct": income_pct,
+            "bedroom_values": [round(v, 1) for v in bedroom_values],
+            "bedroom_pct": bedroom_pct,
+            "parking_values": [round(v, 1) for v in parking_values],
+            "parking_pct": parking_pct,
+            "density_values": [round(v, 1) for v in density_values],
+            "density_pct": density_pct,
+            "far_values": [round(v, 1) for v in far_values],
+            "far_pct": far_pct,
+            "unit_type_values": [round(v, 1) for v in unit_type_values],
+            "unit_type_pct": unit_type_pct,
+            "tcac_values": [round(v, 1) for v in tcac_values],
+            "tcac_pct": tcac_pct,
+            "fire_risk_values": [round(v, 1) for v in fire_risk_values],
+            "fire_risk_pct": fire_risk_pct,
+            "location_data": location_data,
+            "total_units": total_units,
+            "affordable_units": affordable_units,
+        }
+
+    except Exception as e:
+        st.error(f"Error processing aggregation data: {e}")
         import traceback
 
         st.error(traceback.format_exc())
@@ -507,60 +723,54 @@ def create_location_grouped_chart(all_data, location_configs, include_total=True
 
 st.set_page_config(page_title="Market-Feasible Units Dashboard", layout="wide")
 
-# Check for CSV URL parameters
+# Check for simulation ID parameters
 params = st.query_params
 
-urls = {
-    "apply_zoning": "https://storage.googleapis.com/mapcraftlabs.appspot.com/labs_data/StandardCalifornia/simulations/-Ogiwnj-fYy4wjWPOn8-/aggregations/full_aggregations.csv?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=mapcraftlabs%40appspot.gserviceaccount.com%2F20251218%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251218T005811Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=68e7acd3073a81f00b6ec564a7502d59032f314d0bd625fb14a38a57841b77e335ba02b5147e43f7b8f780a0451ce4262542f2d15f4a3cbb5add7386d7acad792ec7f206c5ae612b845c893bb78411436e2745a3553c27e55aba7554fcd1665c0041ac57c1728816523fe4d64c35a6648b4c8149286d17b568305013ea312e61bb37c7f9fb2fff08ab42ddeae36d8ae1c0203d827210e7450a7bd3b9188dd65711ad602eab57c9e0b79587eaa22ee0aa6ff3d8631fb5f6e4ef0d9c6f09bfb9563e6a7d7fccac08dc41e6e99633a871839cd7b45ef1cc0390ece3eb970c100cefde51bcd863ba4914e223aabf02cb1b4417ff71fc4a07623a7c92549879fc5861",
-    "ignore_zoning": "https://storage.googleapis.com/mapcraftlabs.appspot.com/labs_data/StandardCalifornia/simulations/-Ogiwo-hmQWX6i7THCN2/aggregations/full_aggregations.csv?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=mapcraftlabs%40appspot.gserviceaccount.com%2F20251218%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251218T005811Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=6eef358214e5942bb2ca35e415234e70d9f84d7f3a0dc3be28e9525f6ce11f8408b17371795bd60735be1b9b275a77855b4edffd463190ad1274f9561980be76af340efa133e3532e5549420bed28c854b2c2f3cef3aa06d10f6d724dd125e2e8e5892b897d9b697519fd77f1cb2448ce2868e2ea001ed4806b915963788f1dfdba722f793ee2316d5f5b5255a1ae0f12c8f39b261a58d3fca15fd88f4d573b9d85e01ffc0d91860dc36efe12a17f1c40e5ee2291fe3ce7fe3a387871e319b61b3f15bf8a2fbecafd4d36a35f563bc995a570e69c42cac8941501086ac2c266095f19a837e2b5f0af3f58035e4ed50760229b8cb8cae75ff2e21c1d41672590b",
-}
-
-default_unzoned_url = urls["ignore_zoning"]
-default_zoned_url = urls["apply_zoning"]
-
-# Load unzoned baseline
-unzoned_csv_url = (
-    unquote(params.get("unzoned_url"))
-    if params.get("unzoned_url")
-    else default_unzoned_url
-)
-
-# Load multiple zoned scenarios
-zoned_scenarios = []
-for i in range(1, 10):  # Support up to 9 scenarios
-    url_key = f"zoned_url_{i}"
-    url = params.get(url_key)
-    if url:
-        url = unquote(url)
-    elif not url and i < 3:
-        url = default_zoned_url
-    if url:
-        zoned_scenarios.append({"url": url, "name": f"Scenario {i}"})
-
-# Validate we have at least one URL
-if not unzoned_csv_url and not zoned_scenarios:
-    st.error(
-        "Data not found. Please provide 'unzoned_url' and/or 'zoned_url' query parameters."
-    )
+# Get project ID from query params
+project_id = params.get("project_id")
+if not project_id:
+    st.error("No project_id provided. Please provide a project_id in the URL.")
     st.info(
-        "Example: ?unzoned_url=https://example.com/unzoned.csv&zoned_url_1=https://example.com/zoned1.csv&zoned_url_2=https://example.com/zoned2.csv"
+        "Example: ?project_id=StandardCalifornia&simulation_ids=-Ogiwnj-fYy4wjWPOn8-,-Ogiwo-hmQWX6i7THCN2"
     )
     st.stop()
 
-# Load all data
+# Get simulation IDs from query params
+simulation_ids_param = params.get("simulation_ids")
+if not simulation_ids_param:
+    st.error("No simulation IDs provided. Please provide simulation IDs in the URL.")
+    st.info(
+        "Example: ?project_id=StandardCalifornia&simulation_ids=-Ogiwnj-fYy4wjWPOn8-,-Ogiwo-hmQWX6i7THCN2"
+    )
+    st.stop()
+
+# Split by comma if multiple IDs are provided
+simulation_ids = [sid.strip() for sid in simulation_ids_param.split(",")]
+
+# Fetch data from API
+api_response = fetch_data_from_api(simulation_ids, project_id)
+if not api_response:
+    st.error(
+        "Failed to fetch data from API. Please check your simulation IDs and try again."
+    )
+    st.stop()
+
+# Load all data from API response
 all_data = []
 
-# Load unzoned baseline first (will be leftmost in charts)
-if unzoned_csv_url:
-    unzoned_data = load_data_from_aggregation_csv(unzoned_csv_url, "Unzoned")
-    if unzoned_data:
-        all_data.append(unzoned_data)
-
-# Load all zoned scenarios
-for scenario in zoned_scenarios:
-    scenario_data = load_data_from_aggregation_csv(scenario["url"], scenario["name"])
-    if scenario_data:
-        all_data.append(scenario_data)
+# The API returns data as a dict with simulation IDs as keys
+# Each value is a list with one element containing the aggregation data
+for i, sim_id in enumerate(simulation_ids):
+    if sim_id in api_response:
+        # Get the list for this simulation ID and extract the first element
+        data_list = api_response[sim_id]
+        if data_list and len(data_list) > 0:
+            raw_data = data_list[0]
+            # Process the raw data into the expected format
+            scenario_name = f"Scenario {i+1}"
+            processed_data = process_aggregation_data(raw_data, scenario_name)
+            if processed_data:
+                all_data.append(processed_data)
 
 # Check if we successfully loaded any data
 if not all_data:
@@ -595,8 +805,10 @@ parking_types = ["Surface", "Garage", "Podium", "Structured", "Underground"]
 st.title("Market-Feasible Units Dashboard")
 total_data_dict = {"Total Units": [], "Affordable Units": []}
 scenario_names = []
-for data in all_data:
-    scenario_names.append(data["scenario_name"])
+for i, data in enumerate(all_data):
+    # Set default scenario names if not provided in data
+    scenario_name = data.get("scenario_name", f"Scenario {i+1}")
+    scenario_names.append(scenario_name)
     total_data_dict["Total Units"].append(data["total_units"])
     total_data_dict["Affordable Units"].append(data["affordable_units"])
 
