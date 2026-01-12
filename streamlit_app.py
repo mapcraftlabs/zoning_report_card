@@ -731,14 +731,12 @@ try:
     project_id = params.get("project_id")
     if not project_id:
         st.error("❌ No project_id provided")
-        st.info("**Please provide a project_id in the URL.**\n\n")
         st.stop()
 
     # Get simulation IDs from query params
     simulation_ids_param = params.get("simulation_ids")
     if not simulation_ids_param:
         st.error("❌ No simulation IDs provided")
-        st.info("**Please provide simulation IDs in the URL.**\n\n")
         st.stop()
 
     # Split by comma if multiple IDs are provided
