@@ -851,7 +851,7 @@ if all_metadata:
 
     # Create and display the metadata dataframe
     df_metadata = pd.DataFrame(metadata_display)
-    st.dataframe(df_metadata, hide_index=True, use_container_width=True)
+    st.dataframe(df_metadata, hide_index=True, width="stretch")
 
     st.markdown("---")
 
