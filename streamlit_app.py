@@ -22,7 +22,7 @@ def fetch_data_from_api(simulation_ids, project_id):
         Dictionary containing the CSV data or None if error
     """
     try:
-        url = f"https://api.mapcraft.io/simulations/full_aggregations/{project_id}"
+        url = f"https://api.mapcraft.io/simulations/aggregations_data/{project_id}"
         response = requests.post(
             url, json={"simulation_ids": simulation_ids}, timeout=30
         )
@@ -192,14 +192,14 @@ def load_data_from_aggregation_csv(url, scenario_name):
         affordable_units = get_value("affordableUnitsSum")
 
         # Extract fire hazard severity zone (FHSZ) data
-        fhsz_high = get_value("unitsFhszHighSum")
-        fhsz_very_high = get_value("unitsFhszVeryhighSum")
-        fhsz_no = total_units - fhsz_high - fhsz_very_high
+        fire_hazard_high = get_value("unitsFireHazardHighSum")
+        fire_hazard_very_high = get_value("unitsFireHazardVeryHighSum")
+        fire_hazard_none = total_units - fire_hazard_high - fire_hazard_very_high
 
         fire_risk_values = [
-            fhsz_no,  # No fire risk
-            fhsz_high,  # High
-            fhsz_very_high,  # Very High
+            fire_hazard_none,  # No fire risk
+            fire_hazard_high,  # High
+            fire_hazard_very_high,  # Very High
         ]
 
         total_fire_risk = sum(fire_risk_values)
@@ -373,14 +373,14 @@ def process_aggregation_data(data_dict, scenario_name):
         affordable_units = get_value("affordableUnitsSum")
 
         # Extract fire hazard severity zone (FHSZ) data
-        fhsz_high = get_value("unitsFhszHighSum")
-        fhsz_very_high = get_value("unitsFhszVeryhighSum")
-        fhsz_no = total_units - fhsz_high - fhsz_very_high
+        fire_hazard_high = get_value("unitsFireHazardHighSum")
+        fire_hazard_very_high = get_value("unitsFireHazardVeryHighSum")
+        fire_hazard_none = total_units - fire_hazard_high - fire_hazard_very_high
 
         fire_risk_values = [
-            fhsz_no,  # No fire risk
-            fhsz_high,  # High
-            fhsz_very_high,  # Very High
+            fire_hazard_none,  # No fire risk
+            fire_hazard_high,  # High
+            fire_hazard_very_high,  # Very High
         ]
 
         total_fire_risk = sum(fire_risk_values)
@@ -761,17 +761,31 @@ except Exception as e:
 
 # Load all data from API response
 all_data = []
+all_metadata = []
 
 # The API returns data as a dict with simulation IDs as keys
-# Each value is a list with one element containing the aggregation data
+# Each value contains 'metadata' and 'data' properties
 for i, sim_id in enumerate(simulation_ids):
     if sim_id in api_response:
-        # Get the list for this simulation ID and extract the first element
-        data_list = api_response[sim_id]
+        sim_response = api_response[sim_id]
+
+        # Extract metadata
+        metadata = sim_response.get("metadata", {})
+        all_metadata.append(
+            {
+                "simulation_id": sim_id,
+                "name": metadata.get("name", f"Scenario {i+1}"),
+                "description": metadata.get("description", ""),
+                "createDate": metadata.get("createDate", ""),
+            }
+        )
+
+        # Extract data (now a list of data objects)
+        data_list = sim_response.get("data", [])
         if data_list and len(data_list) > 0:
             raw_data = data_list[0]
-            # Process the raw data into the expected format
-            scenario_name = f"Scenario {i+1}"
+            # Process the raw data using the scenario name from metadata
+            scenario_name = metadata.get("name", f"Scenario {i+1}")
             processed_data = process_aggregation_data(raw_data, scenario_name)
             if processed_data:
                 all_data.append(processed_data)
@@ -805,14 +819,55 @@ income_brackets = [
 bedroom_counts = ["0 bedrooms", "1 bedroom", "2 bedrooms", "3+ bedrooms"]
 parking_types = ["Surface", "Garage", "Podium", "Structured", "Underground"]
 
-# Chart 1: Total Feasibility
+# Display metadata table at the top
 st.title("Market-Feasible Units Dashboard")
+
+if all_metadata:
+    st.subheader("Simulation Details")
+
+    # Format the metadata for display
+    metadata_display = []
+    for meta in all_metadata:
+        # Format the date nicely
+        create_date = meta["createDate"]
+        if create_date:
+            try:
+                from datetime import datetime
+
+                dt = datetime.fromisoformat(create_date.replace("Z", "+00:00"))
+                formatted_date = dt.strftime("%B %d, %Y at %I:%M %p")
+            except:
+                formatted_date = create_date
+        else:
+            formatted_date = "N/A"
+
+        metadata_display.append(
+            {
+                "Simulation Name": meta["name"],
+                "Description": meta["description"] if meta["description"] else "N/A",
+                "Created": formatted_date,
+            }
+        )
+
+    # Create and display the metadata dataframe
+    df_metadata = pd.DataFrame(metadata_display)
+    st.dataframe(df_metadata, hide_index=True, use_container_width=True)
+
+    st.markdown("---")
+
+# Chart 1: Total Feasibility
+st.title("Total Feasibility")
 total_data_dict = {"Total Units": [], "Affordable Units": []}
 scenario_names = []
 for i, data in enumerate(all_data):
     # Set default scenario names if not provided in data
     scenario_name = data.get("scenario_name", f"Scenario {i+1}")
-    scenario_names.append(scenario_name)
+    # Truncate long names for chart labels
+    if len(scenario_name) > 30:
+        truncated_name = scenario_name[:27] + "..."
+    else:
+        truncated_name = scenario_name
+    scenario_names.append(truncated_name)
     total_data_dict["Total Units"].append(data["total_units"])
     total_data_dict["Affordable Units"].append(data["affordable_units"])
 
