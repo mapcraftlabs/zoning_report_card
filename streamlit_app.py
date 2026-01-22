@@ -240,6 +240,9 @@ st.dataframe(df_fire_risk.T, width="stretch")
 
 st.markdown("---")
 
+# Summary of new development
+st.title("Summary of new development")
+
 # Chart 5: Units by Building Type
 st.title("New development by building type")
 unit_types = ["SF", "TH", "PLEX", "MF"]
