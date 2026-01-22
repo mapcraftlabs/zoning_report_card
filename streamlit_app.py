@@ -203,7 +203,7 @@ st.dataframe(df_location_with_total.T, width="stretch")
 st.markdown("---")
 
 # Chart 3: TCAC Resource Levels
-st.title("Total units by TCAC resource level")
+st.title("Units by TCAC resource level")
 tcac_levels = ["Low", "Moderate", "High", "Highest"]
 
 fig_tcac = create_multi_scenario_stacked_chart(
@@ -240,7 +240,25 @@ st.dataframe(df_fire_risk.T, width="stretch")
 
 st.markdown("---")
 
-# Chart 5: Income Brackets
+# Chart 5: Units by Building Type
+st.title("New development by building type")
+unit_types = ["SF", "TH", "PLEX", "MF"]
+
+fig_unit_types = create_multi_scenario_stacked_chart(
+    all_data, unit_types, "unit_type_values", unit_type_colors
+)
+st.plotly_chart(fig_unit_types, width="stretch")
+st.subheader("Unit Type Data")
+unit_type_data_values = {utype: [] for utype in unit_types}
+for data in all_data:
+    for i, utype in enumerate(unit_types):
+        unit_type_data_values[utype].append(data["unit_type_values"][i])
+df_unit_types = pd.DataFrame(unit_type_data_values, index=scenario_names)
+st.dataframe(df_unit_types.T, width="stretch")
+
+st.markdown("---")
+
+# Chart 6: Income Brackets
 st.title("New development by income affordability")
 income_brackets = [
     "<=50% MFI",
@@ -262,24 +280,6 @@ for data in all_data:
         income_data_values[bracket].append(data["income_values"][i])
 df_income = pd.DataFrame(income_data_values, index=scenario_names)
 st.dataframe(df_income.T, width="stretch")
-
-st.markdown("---")
-
-# Chart 6: Units by Building Type
-st.title("New development by building type")
-unit_types = ["SF", "TH", "PLEX", "MF"]
-
-fig_unit_types = create_multi_scenario_stacked_chart(
-    all_data, unit_types, "unit_type_values", unit_type_colors
-)
-st.plotly_chart(fig_unit_types, width="stretch")
-st.subheader("Unit Type Data")
-unit_type_data_values = {utype: [] for utype in unit_types}
-for data in all_data:
-    for i, utype in enumerate(unit_types):
-        unit_type_data_values[utype].append(data["unit_type_values"][i])
-df_unit_types = pd.DataFrame(unit_type_data_values, index=scenario_names)
-st.dataframe(df_unit_types.T, width="stretch")
 
 st.markdown("---")
 
