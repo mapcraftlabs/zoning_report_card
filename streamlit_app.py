@@ -138,9 +138,9 @@ if all_metadata:
 
     st.markdown("---")
 
-# Chart 1: Total Feasibility
-st.title("Total Feasibility")
-total_data_dict = {"Total Units": [], "Affordable Units": []}
+# Chart 1: Feasibility Summary
+st.title("Feasibility Summary")
+total_data_dict = {"Total Units": [], "Net Units": [], "Affordable Units": []}
 scenario_names = []
 for i, data in enumerate(all_data):
     # Set default scenario names if not provided in data
@@ -152,6 +152,7 @@ for i, data in enumerate(all_data):
         truncated_name = scenario_name
     scenario_names.append(truncated_name)
     total_data_dict["Total Units"].append(data["total_units"])
+    total_data_dict["Net Units"].append(data["net_units"])
     total_data_dict["Affordable Units"].append(data["affordable_units"])
 
 df_total = pd.DataFrame(total_data_dict, index=scenario_names)
@@ -196,38 +197,20 @@ for data in all_data:
         location_data_with_total[config[1]].append(data["location_data"][config[0]])
 
 df_location_with_total = pd.DataFrame(location_data_with_total, index=scenario_names)
-st.subheader("Location Data (with Total Units)")
+st.subheader("Location Data")
 st.dataframe(df_location_with_total.T, width="stretch")
 
 st.markdown("---")
 
-# Chart 3: Units by Building Type
-st.title("Market-feasible units by building type")
-unit_types = ["SF", "TH", "PLEX", "MF"]
-
-fig_unit_types = create_multi_scenario_stacked_chart(
-    all_data, unit_types, "unit_type_values", unit_type_colors
-)
-st.plotly_chart(fig_unit_types, width="stretch")
-st.subheader("Unit Type Data")
-unit_type_data_values = {utype: [] for utype in unit_types}
-for data in all_data:
-    for i, utype in enumerate(unit_types):
-        unit_type_data_values[utype].append(data["unit_type_values"][i])
-df_unit_types = pd.DataFrame(unit_type_data_values, index=scenario_names)
-st.dataframe(df_unit_types.T, width="stretch")
-
-st.markdown("---")
-
-# Chart 4: TCAC Resource Levels
-st.title("Market-feasible units by TCAC resource level")
+# Chart 3: TCAC Resource Levels
+st.title("Total units by TCAC resource level")
 tcac_levels = ["Low", "Moderate", "High", "Highest"]
 
 fig_tcac = create_multi_scenario_stacked_chart(
     all_data, tcac_levels, "tcac_values", tcac_colors
 )
 st.plotly_chart(fig_tcac, width="stretch")
-st.subheader("TCAC Resource Level Data")
+st.subheader("TCAC Data")
 tcac_data_values = {level: [] for level in tcac_levels}
 for data in all_data:
     for i, level in enumerate(tcac_levels):
@@ -237,8 +220,28 @@ st.dataframe(df_tcac.T, width="stretch")
 
 st.markdown("---")
 
+# Chart 4: Fire Hazard Severity Zone (FHSZ)
+st.title("Units by Fire Risk")
+fire_risk_levels = ["None", "High", "Very High"]
+fire_risk_data_values = {level: [] for level in fire_risk_levels}
+fire_risk_data_pct = {level: [] for level in fire_risk_levels}
+for data in all_data:
+    for i, level in enumerate(fire_risk_levels):
+        fire_risk_data_values[level].append(data["fire_risk_values"][i])
+        fire_risk_data_pct[level].append(data["fire_risk_pct"][i])
+
+df_fire_risk = pd.DataFrame(fire_risk_data_values, index=scenario_names)
+fig_fire_risk = create_multi_scenario_stacked_chart(
+    all_data, fire_risk_levels, "fire_risk_values", fire_risk_colors
+)
+st.plotly_chart(fig_fire_risk, width="stretch")
+st.subheader("Fire Risk Data")
+st.dataframe(df_fire_risk.T, width="stretch")
+
+st.markdown("---")
+
 # Chart 5: Income Brackets
-st.title("Market-feasible units affordable to different income brackets")
+st.title("New development by income affordability")
 income_brackets = [
     "<=50% MFI",
     "51%-100% MFI",
@@ -262,8 +265,26 @@ st.dataframe(df_income.T, width="stretch")
 
 st.markdown("---")
 
-# Chart 6: Bedroom Counts
-st.title("Market-feasible units by bedroom count")
+# Chart 6: Units by Building Type
+st.title("New development by building type")
+unit_types = ["SF", "TH", "PLEX", "MF"]
+
+fig_unit_types = create_multi_scenario_stacked_chart(
+    all_data, unit_types, "unit_type_values", unit_type_colors
+)
+st.plotly_chart(fig_unit_types, width="stretch")
+st.subheader("Unit Type Data")
+unit_type_data_values = {utype: [] for utype in unit_types}
+for data in all_data:
+    for i, utype in enumerate(unit_types):
+        unit_type_data_values[utype].append(data["unit_type_values"][i])
+df_unit_types = pd.DataFrame(unit_type_data_values, index=scenario_names)
+st.dataframe(df_unit_types.T, width="stretch")
+
+st.markdown("---")
+
+# Chart 7: Bedroom Counts
+st.title("New development by bedroom count")
 bedroom_counts = ["0 bedrooms", "1 bedroom", "2 bedrooms", "3+ bedrooms"]
 
 fig_bedrooms = create_multi_scenario_stacked_chart(
@@ -280,8 +301,8 @@ st.dataframe(df_bedrooms.T, width="stretch")
 
 st.markdown("---")
 
-# Chart 7: Parking Types
-st.title("Parking stalls by type")
+# Chart 8: Parking Types
+st.title("New parking stalls by type")
 parking_types = ["Surface", "Garage", "Podium", "Structured", "Underground"]
 
 fig_parking = create_multi_scenario_stacked_chart(
@@ -305,37 +326,31 @@ density_labels = ["<10 DUA", "11-25 DUA", "26-50 DUA", "51-75 DUA", ">75 DUA"]
 far_labels = ["<0.2 FAR", "0.2-0.6 FAR", "0.6-1 FAR", "1-2 FAR", "2-4 FAR", ">4 FAR"]
 
 # Chart: Land Area Coverage by Density
-st.title("Land area cover by density (acres)")
+st.title("Land area cover by DUA (acres)")
 fig_density = create_multi_scenario_stacked_chart(
     all_data, density_labels, "density_values", density_colors
 )
 st.plotly_chart(fig_density, width="stretch")
+st.subheader("DUA Data")
+density_data_values = {label: [] for label in density_labels}
+for data in all_data:
+    for i, label in enumerate(density_labels):
+        density_data_values[label].append(data["density_values"][i])
+df_density = pd.DataFrame(density_data_values, index=scenario_names)
+st.dataframe(df_density.T, width="stretch")
 
 st.markdown("---")
 
 # Chart: Land Area Coverage by FAR (Bulk)
-st.title("Land area cover by bulk (acres)")
+st.title("Land area cover by FAR (acres)")
 fig_far = create_multi_scenario_stacked_chart(
     all_data, far_labels, "far_values", far_colors
 )
 st.plotly_chart(fig_far, width="stretch")
-
-st.markdown("---")
-
-# Chart: Fire Hazard Severity Zone (FHSZ)
-st.title("Units by Fire Risk")
-fire_risk_levels = ["None", "High", "Very High"]
-fire_risk_data_values = {level: [] for level in fire_risk_levels}
-fire_risk_data_pct = {level: [] for level in fire_risk_levels}
+st.subheader("FAR Data")
+far_data_values = {label: [] for label in far_labels}
 for data in all_data:
-    for i, level in enumerate(fire_risk_levels):
-        fire_risk_data_values[level].append(data["fire_risk_values"][i])
-        fire_risk_data_pct[level].append(data["fire_risk_pct"][i])
-
-df_fire_risk = pd.DataFrame(fire_risk_data_values, index=scenario_names)
-fig_fire_risk = create_multi_scenario_stacked_chart(
-    all_data, fire_risk_levels, "fire_risk_values", fire_risk_colors
-)
-st.plotly_chart(fig_fire_risk, width="stretch")
-st.subheader("Fire Risk Data")
-st.dataframe(df_fire_risk.T, width="stretch")
+    for i, label in enumerate(far_labels):
+        far_data_values[label].append(data["far_values"][i])
+df_far = pd.DataFrame(far_data_values, index=scenario_names)
+st.dataframe(df_far.T, width="stretch")

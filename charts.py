@@ -72,7 +72,7 @@ def create_multi_scenario_stacked_chart(all_data, categories, data_key, colors):
 
 
 def create_total_feasibility_chart_grouped(scenario_names, total_data_dict, color):
-    """Create grouped bar chart for total units vs affordable units."""
+    """Create grouped bar chart for total units, affordable units, and net units."""
     fig = go.Figure()
 
     # Add Total Units bar
@@ -89,12 +89,37 @@ def create_total_feasibility_chart_grouped(scenario_names, total_data_dict, colo
         )
     )
 
-    # Add Affordable Units bar with minimum display value
+    # Calculate minimum display value for small bars
     max_value = max(
-        max(total_data_dict["Total Units"]), max(total_data_dict["Affordable Units"])
+        max(total_data_dict["Total Units"]),
+        max(total_data_dict["Affordable Units"]),
+        max(total_data_dict["Net Units"]),
     )
     min_display_value = max_value * 0.01
 
+    # Add Net Units bar (market-rate units)
+    net_display = [
+        val if val > 0 else min_display_value for val in total_data_dict["Net Units"]
+    ]
+
+    fig.add_trace(
+        go.Bar(
+            name="Net Units",
+            x=scenario_names,
+            y=net_display,
+            marker_color="#F4C04E",
+            text=[
+                f"{int(actual)}" if actual > 0 else ""
+                for actual in total_data_dict["Net Units"]
+            ],
+            textposition="inside",
+            textfont=dict(color="white", size=14, weight="bold"),
+            hovertemplate="Net Units: %{customdata}<extra></extra>",
+            customdata=total_data_dict["Net Units"],
+        )
+    )
+
+    # Add Affordable Units bar
     affordable_display = [
         val if val > 0 else min_display_value
         for val in total_data_dict["Affordable Units"]

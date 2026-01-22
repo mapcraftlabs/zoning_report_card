@@ -171,6 +171,7 @@ def process_aggregation_data(data_dict, scenario_name):
         # Get totals
         total_units = get_value("totalUnitsSum")
         affordable_units = get_value("affordableUnitsSum")
+        net_units = get_value("netUnitsSum")
 
         # Extract fire hazard severity zone (FHSZ) data
         fire_hazard_high = get_value("unitsFireHazardHighSum")
@@ -210,6 +211,7 @@ def process_aggregation_data(data_dict, scenario_name):
             "location_data": location_data,
             "total_units": total_units,
             "affordable_units": affordable_units,
+            "net_units": net_units,
         }
 
     except Exception as e:
