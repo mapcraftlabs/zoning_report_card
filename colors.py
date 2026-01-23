@@ -19,6 +19,10 @@ bedroom_count_colors = {
     "1 bedroom": "#F4C04E",
     "2 bedrooms": "#D66E6C",
     "3+ bedrooms": "#6B9BD1",
+    "Affordable 0 bedrooms": "#A8D5A8",
+    "Affordable 1 bedroom": "#F9DD8F",
+    "Affordable 2 bedrooms": "#E8A5A3",
+    "Affordable 3+ bedrooms": "#A5C5E5",
 }
 
 parking_type_colors = {

@@ -288,7 +288,16 @@ st.markdown("---")
 
 # Chart 7: Bedroom Counts
 st.title("New development by bedroom count")
-bedroom_counts = ["0 bedrooms", "1 bedroom", "2 bedrooms", "3+ bedrooms"]
+bedroom_counts = [
+    "0 bedrooms",
+    "1 bedroom",
+    "2 bedrooms",
+    "3+ bedrooms",
+    "Affordable 0 bedrooms",
+    "Affordable 1 bedroom",
+    "Affordable 2 bedrooms",
+    "Affordable 3+ bedrooms",
+]
 
 fig_bedrooms = create_multi_scenario_stacked_chart(
     all_data, bedroom_counts, "bedroom_values", bedroom_count_colors

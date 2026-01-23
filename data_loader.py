@@ -77,6 +77,10 @@ def process_aggregation_data(data_dict, scenario_name):
             get_value("countMarket1BrSum"),
             get_value("countMarket2BrSum"),
             get_value("countMarket3BrSum"),
+            get_value("countAffordable0BrSum"),
+            get_value("countAffordable1BrSum"),
+            get_value("countAffordable2BrSum"),
+            get_value("countAffordable3BrSum"),
         ]
 
         total_bedroom = sum(bedroom_values)
