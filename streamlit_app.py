@@ -274,14 +274,14 @@ income_brackets = [
     "Market rate 201-250% MFI",
     "Market rate >251% MFI",
     "Affordable 30% AMI",
-    "Affordable 40% AMI",
     "Affordable 50% AMI",
     "Affordable 60% AMI",
-    "Affordable 70% AMI",
     "Affordable 80% AMI",
     "Affordable 100% AMI",
     "Affordable 120% AMI",
     "Affordable 140% AMI",
+    "Affordable 150% AMI",
+    "Affordable 170% AMI",
 ]
 
 fig_income = create_multi_scenario_stacked_chart(

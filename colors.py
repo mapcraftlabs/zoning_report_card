@@ -13,14 +13,14 @@ income_bracket_colors = {
     "Market rate 201-250% MFI": "#D66E6C",
     "Market rate >251% MFI": "#6B9BD1",
     "Affordable 30% AMI": "#9FE0DA",
-    "Affordable 40% AMI": "#F5B891",
     "Affordable 50% AMI": "#A8D5A8",
     "Affordable 60% AMI": "#F9DD8F",
-    "Affordable 70% AMI": "#E8A5A3",
     "Affordable 80% AMI": "#A5C5E5",
     "Affordable 100% AMI": "#B8E0D8",
     "Affordable 120% AMI": "#F4CBA8",
     "Affordable 140% AMI": "#C4E4C4",
+    "Affordable 150% AMI": "#D4B5D4",
+    "Affordable 170% AMI": "#C9D9E8",
 }
 
 bedroom_count_colors = {
