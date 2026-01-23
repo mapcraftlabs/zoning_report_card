@@ -264,12 +264,21 @@ st.markdown("---")
 # Chart 6: Income Brackets
 st.title("New development by income affordability")
 income_brackets = [
-    "<=50% MFI",
-    "51%-100% MFI",
-    "101-150% MFI",
-    "151-200% MFI",
-    "201-250% MFI",
-    ">251% MFI",
+    "Market rate <=50% MFI",
+    "Market rate 51%-100% MFI",
+    "Market rate 101-150% MFI",
+    "Market rate 151-200% MFI",
+    "Market rate 201-250% MFI",
+    "Market rate >251% MFI",
+    "Affordable 30% AMI",
+    "Affordable 40% AMI",
+    "Affordable 50% AMI",
+    "Affordable 60% AMI",
+    "Affordable 70% AMI",
+    "Affordable 80% AMI",
+    "Affordable 100% AMI",
+    "Affordable 120% AMI",
+    "Affordable 140% AMI",
 ]
 
 fig_income = create_multi_scenario_stacked_chart(
