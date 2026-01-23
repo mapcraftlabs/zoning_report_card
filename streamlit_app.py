@@ -5,6 +5,7 @@ Market-Feasible Units Dashboard - Main Streamlit Application
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # Import local modules
 from data_loader import fetch_data_from_api, process_aggregation_data
@@ -118,9 +119,9 @@ if all_metadata:
         if create_date:
             try:
                 dt = datetime.fromisoformat(create_date.replace("Z", "+00:00"))
-                # Convert to local timezone
-                local_dt = dt.astimezone()
-                formatted_date = local_dt.strftime("%B %d, %Y at %I:%M %p")
+                # Convert to Pacific time
+                pacific_dt = dt.astimezone(ZoneInfo("America/Los_Angeles"))
+                formatted_date = pacific_dt.strftime("%B %d, %Y at %I:%M %p PT")
             except:
                 formatted_date = create_date
         else:
