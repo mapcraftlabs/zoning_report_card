@@ -204,7 +204,7 @@ st.markdown("---")
 
 # Chart 3: TCAC Resource Levels
 st.title("Units by TCAC resource level")
-tcac_levels = ["Low", "Moderate", "High", "Highest"]
+tcac_levels = ["Not TCAC", "Low", "Moderate", "High", "Highest"]
 
 fig_tcac = create_multi_scenario_stacked_chart(
     all_data, tcac_levels, "tcac_values", tcac_colors

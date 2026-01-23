@@ -147,6 +147,7 @@ def process_aggregation_data(data_dict, scenario_name):
 
         # Extract TCAC resource level data
         tcac_values = [
+            get_value("unitsByTcacNotTcacSum"),  # Not TCAC
             get_value("unitsByTcacLowResourceSum"),  # Low
             get_value("unitsByTcacModerateResourceSum"),  # Moderate
             get_value("unitsByTcacHighResourceSum"),  # High

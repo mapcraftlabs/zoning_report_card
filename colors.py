@@ -58,6 +58,7 @@ tcac_colors = {
     "Moderate": "#F4C04E",
     "High": "#6FB573",
     "Highest": "#6B9BD1",
+    "Not TCAC": "#5DBDB4",
 }
 
 fire_risk_colors = {
