@@ -118,7 +118,9 @@ if all_metadata:
         if create_date:
             try:
                 dt = datetime.fromisoformat(create_date.replace("Z", "+00:00"))
-                formatted_date = dt.strftime("%B %d, %Y at %I:%M %p")
+                # Convert to local timezone
+                local_dt = dt.astimezone()
+                formatted_date = local_dt.strftime("%B %d, %Y at %I:%M %p")
             except:
                 formatted_date = create_date
         else:
