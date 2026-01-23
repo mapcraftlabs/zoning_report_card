@@ -38,7 +38,7 @@ def create_multi_scenario_stacked_chart(all_data, categories, data_key, colors):
                 name=category,
                 x=scenario_names,
                 y=values,
-                marker_color=colors[category],
+                marker_color=colors.get(category, "#999999"),  # Use gray as fallback
                 text=[f"{int(v)}" if v > 0 else "" for v in values],
                 textposition="inside",
                 textfont=dict(color="white", size=14),
