@@ -60,10 +60,10 @@ far_colors = {
 }
 
 unit_type_colors = {
-    "SF": "#6B9BD1",
-    "MF": "#F07D4A",
-    "TH": "#6FB573",
-    "PLEX": "#F4C04E",
+    "sf": "#6B9BD1",
+    "mf": "#F07D4A",
+    "th": "#6FB573",
+    "plex": "#F4C04E",
 }
 
 tcac_colors = {

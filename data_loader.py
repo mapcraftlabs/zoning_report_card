@@ -146,10 +146,10 @@ def process_aggregation_data(data_dict, scenario_name):
 
         # Extract units by type data
         unit_type_values = [
-            get_value("unitsByTypeSFSum"),  # SF
-            get_value("unitsByTypeTHSum"),  # TH
-            get_value("unitsByTypePLEXSum"),  # PLEX
-            get_value("unitsByTypeMFSum"),  # MF
+            get_value("unitsByTypeSfSum"),  # SF
+            get_value("unitsByTypeThSum"),  # TH
+            get_value("unitsByTypePlexSum"),  # PLEX
+            get_value("unitsByTypeMfSum"),  # MF
         ]
 
         total_unit_types = sum(unit_type_values)
@@ -172,14 +172,35 @@ def process_aggregation_data(data_dict, scenario_name):
             round(v / total_tcac * 100, 1) if total_tcac > 0 else 0 for v in tcac_values
         ]
 
-        # Extract location-based data
+        # Extract location-based data (all possible attributes)
         location_data = {
-            "fault_zone": get_value("unitsFaultZoneSum"),
-            "historic_district": get_value("unitsHistoricDistrictSum"),
+            # Transit/Transportation (ordered by proximity)
+            "hq_transit_area": get_value("unitsHqTransitAreaSum"),
+            "tod_area": get_value("unitsTodAreaSum"),
+            "quarter_mile_of_rail": get_value("unitsQuarterMileOfRailSum"),
+            "half_mile_of_rail_or_brt": get_value("unitsHalfMileOfRailOrBrtSum"),
+            "half_mile_of_brt": get_value("unitsHalfMileOfBrtSum"),
+            "near_transit": get_value("unitsNearTransitSum"),
+            # Urban characteristics
             "urbanized": get_value("unitsUrbanizedSum"),
             "walkable": get_value("unitsWalkableSum"),
-            "near_transit": get_value("unitsNearTransitSum"),
+            "mfte": get_value("unitsMfteSum"),
+            "industrial": get_value("unitsIndustrialSum"),
+            "historic_district": get_value("unitsHistoricDistrictSum"),
+            # Environmental/Geological hazards
+            "critical": get_value("unitsCriticalSum"),
+            "geological": get_value("unitsGeologicalSum"),
+            "seismic": get_value("unitsSeismicSum"),
+            "fault_zone": get_value("unitsFaultZoneSum"),
+            "landslide": get_value("unitsLandslideSum"),
+            "steep_slope": get_value("unitsSteepSlopeSum"),
+            "erosion": get_value("unitsErosionSum"),
             "wui": get_value("unitsWuiSum"),
+            "tsunami": get_value("unitsTsunamiSum"),
+            "sea_level_rise": get_value("unitsSeaLevelRiseSum"),
+            # Habitat
+            "habitat": get_value("unitsHabitatSum"),
+            "habitat_priority": get_value("unitsHabitatPrioritySum"),
         }
 
         # Get totals

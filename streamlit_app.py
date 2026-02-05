@@ -174,54 +174,93 @@ st.markdown("---")
 # Chart 2: Units by Location
 st.title("Units by Location")
 
-location_configs = [
-    ("fault_zone", "Fault Zone", "#D66E6C"),
-    ("historic_district", "Historic District", "#6B9BD1"),
-    ("urbanized", "Urbanized", "#6FB573"),
-    ("walkable", "Walkable", "#F4C04E"),
-    ("near_transit", "Near Transit", "#5DBDB4"),
-    ("wui", "WUI", "#F07D4A"),
+# All possible location configs (key, display_name, color)
+all_location_configs = [
+    # Transit/Transportation
+    ("hq_transit_area", "HQ Transit Area", "#5DBDB4"),
+    ("tod_area", "TOD Area", "#6B9BD1"),
+    ("quarter_mile_of_rail", "Quarter Mile of Rail", "#6FB573"),
+    ("half_mile_of_rail_or_brt", "Half Mile of Rail or BRT", "#F4C04E"),
+    ("half_mile_of_brt", "Half Mile of BRT", "#F07D4A"),
+    ("near_transit", "Near Transit", "#D66E6C"),
+    # Urban characteristics
+    ("urbanized", "Urbanized", "#5DBDB4"),
+    ("walkable", "Walkable", "#6B9BD1"),
+    ("mfte", "MFTE", "#6FB573"),
+    ("industrial", "Industrial", "#F4C04E"),
+    ("historic_district", "Historic District", "#F07D4A"),
+    # Environmental/Geological hazards
+    ("critical", "Critical", "#D66E6C"),
+    ("geological", "Geological", "#5DBDB4"),
+    ("seismic", "Seismic", "#6B9BD1"),
+    ("fault_zone", "Fault Zone", "#6FB573"),
+    ("landslide", "Landslide", "#F4C04E"),
+    ("steep_slope", "Steep Slope", "#F07D4A"),
+    ("erosion", "Erosion", "#D66E6C"),
+    ("wui", "WUI", "#5DBDB4"),
+    ("tsunami", "Tsunami", "#6B9BD1"),
+    ("sea_level_rise", "Sea Level Rise", "#6FB573"),
+    # Habitat
+    ("habitat", "Habitat", "#F4C04E"),
+    ("habitat_priority", "Habitat Priority", "#F07D4A"),
 ]
 
-# Chart with Total Units included
-fig_location_with_total = create_location_grouped_chart(
-    all_data, location_configs, include_total=True
-)
-st.plotly_chart(fig_location_with_total, width="stretch")
+# Filter to only include location configs where at least one scenario has data
+location_configs = []
+for config in all_location_configs:
+    key = config[0]
+    # Check if any scenario has non-zero data for this location
+    has_data = any(data["location_data"].get(key, 0) > 0 for data in all_data)
+    if has_data:
+        location_configs.append(config)
 
-# Create dataframe for location data including total
-location_data_with_total = {"Total Units": []}
-for config in location_configs:
-    location_data_with_total[config[1]] = []
+# Only show location chart if there are location attributes with data
+if location_configs:
+    # Chart with Total Units included
+    fig_location_with_total = create_location_grouped_chart(
+        all_data, location_configs, include_total=True
+    )
+    st.plotly_chart(fig_location_with_total, width="stretch")
 
-for data in all_data:
-    location_data_with_total["Total Units"].append(data["total_units"])
+    # Create dataframe for location data including total
+    location_data_with_total = {"Total Units": []}
     for config in location_configs:
-        location_data_with_total[config[1]].append(data["location_data"][config[0]])
+        location_data_with_total[config[1]] = []
 
-df_location_with_total = pd.DataFrame(location_data_with_total, index=scenario_names)
-st.subheader("Location Data")
-st.dataframe(df_location_with_total.T, width="stretch")
+    for data in all_data:
+        location_data_with_total["Total Units"].append(data["total_units"])
+        for config in location_configs:
+            location_data_with_total[config[1]].append(data["location_data"][config[0]])
+
+    df_location_with_total = pd.DataFrame(
+        location_data_with_total, index=scenario_names
+    )
+    st.subheader("Location Data")
+    st.dataframe(df_location_with_total.T, width="stretch")
 
 st.markdown("---")
 
 # Chart 3: TCAC Resource Levels
-st.title("Units by TCAC resource level")
-tcac_levels = ["Not TCAC", "Low", "Moderate", "High", "Highest"]
+# Check if TCAC data exists (all values are not zero)
+has_tcac_data = any(any(data["tcac_values"]) for data in all_data)
 
-fig_tcac = create_multi_scenario_stacked_chart(
-    all_data, tcac_levels, "tcac_values", tcac_colors
-)
-st.plotly_chart(fig_tcac, width="stretch")
-st.subheader("TCAC Data")
-tcac_data_values = {level: [] for level in tcac_levels}
-for data in all_data:
-    for i, level in enumerate(tcac_levels):
-        tcac_data_values[level].append(data["tcac_values"][i])
-df_tcac = pd.DataFrame(tcac_data_values, index=scenario_names)
-st.dataframe(df_tcac.T, width="stretch")
+if has_tcac_data:
+    st.title("Units by TCAC resource level")
+    tcac_levels = ["Not TCAC", "Low", "Moderate", "High", "Highest"]
 
-st.markdown("---")
+    fig_tcac = create_multi_scenario_stacked_chart(
+        all_data, tcac_levels, "tcac_values", tcac_colors
+    )
+    st.plotly_chart(fig_tcac, width="stretch")
+    st.subheader("TCAC Data")
+    tcac_data_values = {level: [] for level in tcac_levels}
+    for data in all_data:
+        for i, level in enumerate(tcac_levels):
+            tcac_data_values[level].append(data["tcac_values"][i])
+    df_tcac = pd.DataFrame(tcac_data_values, index=scenario_names)
+    st.dataframe(df_tcac.T, width="stretch")
+
+    st.markdown("---")
 
 # Chart 4: Fire Hazard Severity Zone (FHSZ)
 st.title("Units by Fire Risk")
@@ -248,16 +287,23 @@ st.title("Summary of new development")
 
 # Chart 5: Units by Building Type
 st.title("New development by building type")
-unit_types = ["SF", "TH", "PLEX", "MF"]
+unit_types_lowercase = ["sf", "th", "plex", "mf"]
+unit_types_display = ["SF", "TH", "PLEX", "MF"]
+
+# Create a mapping from display labels to colors using lowercase keys
+unit_type_colors_display = {
+    display: unit_type_colors[lower]
+    for display, lower in zip(unit_types_display, unit_types_lowercase)
+}
 
 fig_unit_types = create_multi_scenario_stacked_chart(
-    all_data, unit_types, "unit_type_values", unit_type_colors
+    all_data, unit_types_display, "unit_type_values", unit_type_colors_display
 )
 st.plotly_chart(fig_unit_types, width="stretch")
 st.subheader("Unit Type Data")
-unit_type_data_values = {utype: [] for utype in unit_types}
+unit_type_data_values = {utype: [] for utype in unit_types_display}
 for data in all_data:
-    for i, utype in enumerate(unit_types):
+    for i, utype in enumerate(unit_types_display):
         unit_type_data_values[utype].append(data["unit_type_values"][i])
 df_unit_types = pd.DataFrame(unit_type_data_values, index=scenario_names)
 st.dataframe(df_unit_types.T, width="stretch")
@@ -265,7 +311,7 @@ st.dataframe(df_unit_types.T, width="stretch")
 st.markdown("---")
 
 # Chart 6: Income Brackets
-st.title("New development by income affordability")
+st.title("New development by income affordability (TODO)")
 income_brackets = [
     "Market rate <=50% MFI",
     "Market rate 51%-100% MFI",
