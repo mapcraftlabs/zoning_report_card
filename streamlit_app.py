@@ -263,24 +263,30 @@ if has_tcac_data:
     st.markdown("---")
 
 # Chart 4: Fire Hazard Severity Zone (FHSZ)
-st.title("Units by Fire Risk")
-fire_risk_levels = ["None", "High", "Very High"]
-fire_risk_data_values = {level: [] for level in fire_risk_levels}
-fire_risk_data_pct = {level: [] for level in fire_risk_levels}
-for data in all_data:
-    for i, level in enumerate(fire_risk_levels):
-        fire_risk_data_values[level].append(data["fire_risk_values"][i])
-        fire_risk_data_pct[level].append(data["fire_risk_pct"][i])
-
-df_fire_risk = pd.DataFrame(fire_risk_data_values, index=scenario_names)
-fig_fire_risk = create_multi_scenario_stacked_chart(
-    all_data, fire_risk_levels, "fire_risk_values", fire_risk_colors
+# Check if fire risk data exists (has fire_risk_values in all scenarios)
+has_fire_data = all(
+    "fire_risk_values" in data and data["fire_risk_values"] for data in all_data
 )
-st.plotly_chart(fig_fire_risk, width="stretch")
-st.subheader("Fire Risk Data")
-st.dataframe(df_fire_risk.T, width="stretch")
 
-st.markdown("---")
+if has_fire_data:
+    st.title("Units by Fire Risk")
+    fire_risk_levels = ["None", "High", "Very High"]
+    fire_risk_data_values = {level: [] for level in fire_risk_levels}
+    fire_risk_data_pct = {level: [] for level in fire_risk_levels}
+    for data in all_data:
+        for i, level in enumerate(fire_risk_levels):
+            fire_risk_data_values[level].append(data["fire_risk_values"][i])
+            fire_risk_data_pct[level].append(data["fire_risk_pct"][i])
+
+    df_fire_risk = pd.DataFrame(fire_risk_data_values, index=scenario_names)
+    fig_fire_risk = create_multi_scenario_stacked_chart(
+        all_data, fire_risk_levels, "fire_risk_values", fire_risk_colors
+    )
+    st.plotly_chart(fig_fire_risk, width="stretch")
+    st.subheader("Fire Risk Data")
+    st.dataframe(df_fire_risk.T, width="stretch")
+
+    st.markdown("---")
 
 # Summary of new development
 st.title("Summary of new development")

@@ -209,21 +209,32 @@ def process_aggregation_data(data_dict, scenario_name):
         net_units = get_value("netUnitsSum")
 
         # Extract fire hazard severity zone (FHSZ) data
+        # Only include fire data if the required columns are present
         fire_hazard_high = get_value("unitsFireHazardHighSum")
         fire_hazard_very_high = get_value("unitsFireHazardVeryHighSum")
-        fire_hazard_none = total_units - fire_hazard_high - fire_hazard_very_high
 
-        fire_risk_values = [
-            fire_hazard_none,  # No fire risk
-            fire_hazard_high,  # High
-            fire_hazard_very_high,  # Very High
-        ]
+        # Check if fire columns are actually available (not just default zeros)
+        has_fire_columns = (
+            "unitsFireHazardHighSum" in data_dict
+            or "unitsFireHazardVeryHighSum" in data_dict
+        )
 
-        total_fire_risk = sum(fire_risk_values)
-        fire_risk_pct = [
-            round(v / total_fire_risk * 100, 1) if total_fire_risk > 0 else 0
-            for v in fire_risk_values
-        ]
+        if has_fire_columns:
+            fire_hazard_none = total_units - fire_hazard_high - fire_hazard_very_high
+            fire_risk_values = [
+                fire_hazard_none,  # No fire risk
+                fire_hazard_high,  # High
+                fire_hazard_very_high,  # Very High
+            ]
+
+            total_fire_risk = sum(fire_risk_values)
+            fire_risk_pct = [
+                round(v / total_fire_risk * 100, 1) if total_fire_risk > 0 else 0
+                for v in fire_risk_values
+            ]
+        else:
+            fire_risk_values = []
+            fire_risk_pct = []
 
         return {
             "scenario_name": scenario_name,
