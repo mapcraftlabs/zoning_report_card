@@ -63,15 +63,11 @@ def process_aggregation_data(data_dict, scenario_name):
             get_value("marketUnits151200Sum"),
             get_value("marketUnits201250Sum"),
             get_value("marketUnits251Sum"),
-            get_value("affordableUnits30Sum"),
-            get_value("affordableUnits50Sum"),
-            get_value("affordableUnits60Sum"),
-            get_value("affordableUnits80Sum"),
-            get_value("affordableUnits100Sum"),
-            get_value("affordableUnits120Sum"),
-            get_value("affordableUnits140Sum"),
-            get_value("affordableUnits150Sum"),
-            get_value("affordableUnits170Sum"),
+            get_value("amiUnitsBinned050Sum"),
+            get_value("amiUnitsBinned5080Sum"),
+            get_value("amiUnitsBinned80100Sum"),
+            get_value("amiUnitsBinned100120Sum"),
+            get_value("amiUnitsBinned120PlusSum"),
         ]
 
         total_income = sum(income_values)
