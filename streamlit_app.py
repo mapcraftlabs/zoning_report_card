@@ -317,7 +317,7 @@ st.dataframe(df_unit_types.T, width="stretch")
 st.markdown("---")
 
 # Chart 6: Income Brackets
-st.title("New development by income affordability (TODO)")
+st.title("New development by income affordability")
 income_brackets = [
     "Market rate <=50% MFI",
     "Market rate 51%-100% MFI",
