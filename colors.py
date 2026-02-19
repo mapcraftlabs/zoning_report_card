@@ -6,13 +6,13 @@ Color schemes for charts in the zoning report card dashboard.
 total_feasibility_color = "#D66E6C"
 
 income_bracket_colors = {
-    "Market rate <=50% MFI": "#5DBDB4",
-    "Market rate 51%-100% MFI": "#F07D4A",
-    "Market rate 101-150% MFI": "#6FB573",
-    "Market rate 151-200% MFI": "#F4C04E",
-    "Market rate 201-250% MFI": "#D66E6C",
-    "Market rate >251% MFI": "#6B9BD1",
-    "Affordable <=50% AMI": "#9FE0DA",
+    "Market rate 0-50% MFI": "#5DBDB4",
+    "Market rate 50-100% MFI": "#F07D4A",
+    "Market rate 100-150% MFI": "#6FB573",
+    "Market rate 150-200% MFI": "#F4C04E",
+    "Market rate 200-250% MFI": "#D66E6C",
+    "Market rate 250%+ MFI": "#6B9BD1",
+    "Affordable 0-50% AMI": "#9FE0DA",
     "Affordable 50-80% AMI": "#A8D5A8",
     "Affordable 80-100% AMI": "#F9DD8F",
     "Affordable 100-120% AMI": "#A5C5E5",

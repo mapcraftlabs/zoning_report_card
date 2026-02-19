@@ -203,6 +203,9 @@ all_location_configs = [
     # Habitat
     ("habitat", "Habitat", "#F4C04E"),
     ("habitat_priority", "Habitat Priority", "#F07D4A"),
+    # Agriculture / Water
+    ("agriculture", "Agriculture", "#6FB573"),
+    ("aquifer_recharge", "Aquifer Recharge", "#5DBDB4"),
 ]
 
 # Filter to only include location configs where at least one scenario has data
@@ -319,13 +322,13 @@ st.markdown("---")
 # Chart 6: Income Brackets
 st.title("New development by income affordability")
 income_brackets = [
-    "Market rate <=50% MFI",
-    "Market rate 51%-100% MFI",
-    "Market rate 101-150% MFI",
-    "Market rate 151-200% MFI",
-    "Market rate 201-250% MFI",
-    "Market rate >251% MFI",
-    "Affordable <=50% AMI",
+    "Market rate 0-50% MFI",
+    "Market rate 50-100% MFI",
+    "Market rate 100-150% MFI",
+    "Market rate 150-200% MFI",
+    "Market rate 200-250% MFI",
+    "Market rate 250%+ MFI",
+    "Affordable 0-50% AMI",
     "Affordable 50-80% AMI",
     "Affordable 80-100% AMI",
     "Affordable 100-120% AMI",

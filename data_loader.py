@@ -57,17 +57,17 @@ def process_aggregation_data(data_dict, scenario_name):
 
         # Extract income bracket data
         income_values = [
-            get_value("marketUnits050Sum"),
-            get_value("marketUnits51100Sum"),
-            get_value("marketUnits101150Sum"),
-            get_value("marketUnits151200Sum"),
-            get_value("marketUnits201250Sum"),
-            get_value("marketUnits251Sum"),
-            get_value("amiUnitsBinned050Sum"),
-            get_value("amiUnitsBinned5080Sum"),
-            get_value("amiUnitsBinned80100Sum"),
-            get_value("amiUnitsBinned100120Sum"),
-            get_value("amiUnitsBinned120PlusSum"),
+            get_value("marketUnitsBinned050Sum"),
+            get_value("marketUnitsBinned50100Sum"),
+            get_value("marketUnitsBinned100150Sum"),
+            get_value("marketUnitsBinned150200Sum"),
+            get_value("marketUnitsBinned200250Sum"),
+            get_value("marketUnitsBinned250PlusSum"),
+            get_value("affordableUnitsBinned050Sum"),
+            get_value("affordableUnitsBinned5080Sum"),
+            get_value("affordableUnitsBinned80100Sum"),
+            get_value("affordableUnitsBinned100120Sum"),
+            get_value("affordableUnitsBinned120PlusSum"),
         ]
 
         total_income = sum(income_values)
@@ -197,6 +197,9 @@ def process_aggregation_data(data_dict, scenario_name):
             # Habitat
             "habitat": get_value("unitsHabitatSum"),
             "habitat_priority": get_value("unitsHabitatPrioritySum"),
+            # Agriculture / Water
+            "agriculture": get_value("unitsAgricultureSum"),
+            "aquifer_recharge": get_value("unitsAquiferRechargeSum"),
         }
 
         # Get totals
