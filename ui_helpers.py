@@ -18,12 +18,12 @@ def get_query_param_value(params, key: str, default: str = "") -> str:
 
 
 def is_embed_mode(params) -> bool:
-    """Return whether the app is being rendered in embedded mode."""
-    embed_param = get_query_param_value(params, "embed") or get_query_param_value(
-        params, "embedded", "false"
-    )
-    embed_param = embed_param.lower()
-    return embed_param in {"1", "true", "yes"}
+    """Return whether the app is being rendered in embedded mode.
+
+    Uses app_embed because Streamlit's own embed=true param is consumed by
+    the JS frontend and never forwarded to Python's st.query_params.
+    """
+    return get_query_param_value(params, "app_embed").lower() == "true"
 
 
 def apply_embed_styles(params) -> bool:
