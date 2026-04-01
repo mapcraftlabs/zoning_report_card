@@ -58,12 +58,15 @@ def apply_embed_styles(params) -> bool:
             background: transparent !important;
         }
 
-        /* Hide header and footer in case embed=true doesn't catch them */
+        /* Hide header, decoration stripe, and footer */
         [data-testid="stHeader"],
         [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        [data-testid="stStatusWidget"],
         [data-testid="stBottom"],
         footer {
             display: none !important;
+            visibility: hidden !important;
         }
         </style>
         """,
