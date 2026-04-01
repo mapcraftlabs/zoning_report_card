@@ -25,7 +25,7 @@ from colors import (
     tcac_colors,
     fire_risk_colors,
 )
-from ui_helpers import apply_embed_styles
+from ui_helpers import apply_embed_styles, render_subheader, render_title
 
 
 # ============================================================================
@@ -38,7 +38,7 @@ try:
     # Check for simulation ID parameters
     params = st.query_params
 
-    apply_embed_styles(params)
+    is_embedded = apply_embed_styles(params)
 
     # Get project ID from query params
     project_id = params.get("project_id")
@@ -109,10 +109,10 @@ if not all_data:
     st.stop()
 
 # Display metadata table at the top
-st.title("Market-Feasible Units Dashboard")
+render_title("Market-Feasible Units Dashboard", is_embedded)
 
-if all_metadata:
-    st.subheader("Simulation Details")
+if all_metadata and not is_embedded:
+    render_subheader("Simulation Details", is_embedded)
 
     # Format the metadata for display
     metadata_display = []
@@ -145,7 +145,7 @@ if all_metadata:
     st.markdown("---")
 
 # Chart 1: Feasibility Summary
-st.title("Feasibility Summary")
+render_title("Feasibility Summary", is_embedded)
 total_data_dict = {"Total Units": [], "Net Units": [], "Affordable Units": []}
 scenario_names = []
 for i, data in enumerate(all_data):
@@ -169,13 +169,13 @@ fig_total = create_total_feasibility_chart_grouped(
 )
 
 st.plotly_chart(fig_total, width="stretch")
-st.subheader("Feasibility Data")
+render_subheader("Feasibility Data", is_embedded)
 st.dataframe(df_total.T, width="stretch")
 
 st.markdown("---")
 
 # Chart 2: Units by Location
-st.title("Units by Location")
+render_title("Units by Location", is_embedded)
 
 # All possible location configs (key, display_name, color)
 all_location_configs = [
@@ -241,7 +241,7 @@ if location_configs:
     df_location_with_total = pd.DataFrame(
         location_data_with_total, index=scenario_names
     )
-    st.subheader("Location Data")
+    render_subheader("Location Data", is_embedded)
     st.dataframe(df_location_with_total.T, width="stretch")
 
 st.markdown("---")
@@ -251,14 +251,14 @@ st.markdown("---")
 has_tcac_data = any(any(data["tcac_values"]) for data in all_data)
 
 if has_tcac_data:
-    st.title("Units by TCAC resource level")
+    render_title("Units by TCAC resource level", is_embedded)
     tcac_levels = ["Not TCAC", "Low", "Moderate", "High", "Highest"]
 
     fig_tcac = create_multi_scenario_stacked_chart(
         all_data, tcac_levels, "tcac_values", tcac_colors
     )
     st.plotly_chart(fig_tcac, width="stretch")
-    st.subheader("TCAC Data")
+    render_subheader("TCAC Data", is_embedded)
     tcac_data_values = {level: [] for level in tcac_levels}
     for data in all_data:
         for i, level in enumerate(tcac_levels):
@@ -275,7 +275,7 @@ has_fire_data = all(
 )
 
 if has_fire_data:
-    st.title("Units by Fire Risk")
+    render_title("Units by Fire Risk", is_embedded)
     fire_risk_levels = ["None", "High", "Very High"]
     fire_risk_data_values = {level: [] for level in fire_risk_levels}
     fire_risk_data_pct = {level: [] for level in fire_risk_levels}
@@ -289,16 +289,16 @@ if has_fire_data:
         all_data, fire_risk_levels, "fire_risk_values", fire_risk_colors
     )
     st.plotly_chart(fig_fire_risk, width="stretch")
-    st.subheader("Fire Risk Data")
+    render_subheader("Fire Risk Data", is_embedded)
     st.dataframe(df_fire_risk.T, width="stretch")
 
     st.markdown("---")
 
 # Summary of new development
-st.title("Summary of new development")
+render_title("Summary of new development", is_embedded)
 
 # Chart 5: Units by Building Type
-st.title("New development by building type")
+render_title("New development by building type", is_embedded)
 unit_types_lowercase = ["sf", "th", "plex", "mf"]
 unit_types_display = ["SF", "TH", "PLEX", "MF"]
 
@@ -312,7 +312,7 @@ fig_unit_types = create_multi_scenario_stacked_chart(
     all_data, unit_types_display, "unit_type_values", unit_type_colors_display
 )
 st.plotly_chart(fig_unit_types, width="stretch")
-st.subheader("Unit Type Data")
+render_subheader("Unit Type Data", is_embedded)
 unit_type_data_values = {utype: [] for utype in unit_types_display}
 for data in all_data:
     for i, utype in enumerate(unit_types_display):
@@ -323,7 +323,7 @@ st.dataframe(df_unit_types.T, width="stretch")
 st.markdown("---")
 
 # Chart 6: Income Brackets
-st.title("New development by income affordability")
+render_title("New development by income affordability", is_embedded)
 income_brackets = [
     "Market rate 0-50% MFI",
     "Market rate 50-100% MFI",
@@ -342,7 +342,7 @@ fig_income = create_multi_scenario_stacked_chart(
     all_data, income_brackets, "income_values", income_bracket_colors
 )
 st.plotly_chart(fig_income, width="stretch")
-st.subheader("Income Bracket Data")
+render_subheader("Income Bracket Data", is_embedded)
 income_data_values = {bracket: [] for bracket in income_brackets}
 for data in all_data:
     for i, bracket in enumerate(income_brackets):
@@ -353,7 +353,7 @@ st.dataframe(df_income.T, width="stretch")
 st.markdown("---")
 
 # Chart 7: Bedroom Counts
-st.title("New development by bedroom count")
+render_title("New development by bedroom count", is_embedded)
 bedroom_counts = [
     "0 bedrooms",
     "1 bedroom",
@@ -369,7 +369,7 @@ fig_bedrooms = create_multi_scenario_stacked_chart(
     all_data, bedroom_counts, "bedroom_values", bedroom_count_colors
 )
 st.plotly_chart(fig_bedrooms, width="stretch")
-st.subheader("Bedroom Count Data")
+render_subheader("Bedroom Count Data", is_embedded)
 bedroom_data_values = {count: [] for count in bedroom_counts}
 for data in all_data:
     for i, count in enumerate(bedroom_counts):
@@ -380,14 +380,14 @@ st.dataframe(df_bedrooms.T, width="stretch")
 st.markdown("---")
 
 # Chart 8: Parking Types
-st.title("New parking stalls by type")
+render_title("New parking stalls by type", is_embedded)
 parking_types = ["Surface", "Garage", "Podium", "Structured", "Underground"]
 
 fig_parking = create_multi_scenario_stacked_chart(
     all_data, parking_types, "parking_values", parking_type_colors
 )
 st.plotly_chart(fig_parking, width="stretch")
-st.subheader("Parking Data")
+render_subheader("Parking Data", is_embedded)
 parking_data_values = {ptype: [] for ptype in parking_types}
 for data in all_data:
     for i, ptype in enumerate(parking_types):
@@ -398,18 +398,18 @@ st.dataframe(df_parking.T, width="stretch")
 st.markdown("---")
 
 # Land Area Coverage by Density and FAR
-st.title("Land Area Coverage")
+render_title("Land Area Coverage", is_embedded)
 
 density_labels = ["<10 DUA", "11-25 DUA", "26-50 DUA", "51-75 DUA", ">75 DUA"]
 far_labels = ["<0.2 FAR", "0.2-0.6 FAR", "0.6-1 FAR", "1-2 FAR", "2-4 FAR", ">4 FAR"]
 
 # Chart: Land Area Coverage by Density
-st.title("Land area cover by DUA (acres)")
+render_title("Land area cover by DUA (acres)", is_embedded)
 fig_density = create_multi_scenario_stacked_chart(
     all_data, density_labels, "density_values", density_colors
 )
 st.plotly_chart(fig_density, width="stretch")
-st.subheader("DUA Data")
+render_subheader("DUA Data", is_embedded)
 density_data_values = {label: [] for label in density_labels}
 for data in all_data:
     for i, label in enumerate(density_labels):
@@ -420,12 +420,12 @@ st.dataframe(df_density.T, width="stretch")
 st.markdown("---")
 
 # Chart: Land Area Coverage by FAR (Bulk)
-st.title("Land area cover by FAR (acres)")
+render_title("Land area cover by FAR (acres)", is_embedded)
 fig_far = create_multi_scenario_stacked_chart(
     all_data, far_labels, "far_values", far_colors
 )
 st.plotly_chart(fig_far, width="stretch")
-st.subheader("FAR Data")
+render_subheader("FAR Data", is_embedded)
 far_data_values = {label: [] for label in far_labels}
 for data in all_data:
     for i, label in enumerate(far_labels):
