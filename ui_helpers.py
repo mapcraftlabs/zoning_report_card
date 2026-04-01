@@ -26,22 +26,6 @@ def is_embed_mode(params) -> bool:
     return embed_param in {"1", "true", "yes"}
 
 
-def render_embed_debug(params, is_embedded: bool) -> None:
-    """Show the raw embed-related query param values for debugging."""
-    embed_value = get_query_param_value(params, "embed", "<missing>")
-    embedded_value = get_query_param_value(params, "embedded", "<missing>")
-
-    st.caption(
-        " | ".join(
-            [
-                f"embed={embed_value}",
-                f"embedded={embedded_value}",
-                f"detected_embed={is_embedded}",
-            ]
-        )
-    )
-
-
 def apply_embed_styles(params) -> bool:
     """Remove default framed styling when the app is embedded."""
     is_embedded = is_embed_mode(params)

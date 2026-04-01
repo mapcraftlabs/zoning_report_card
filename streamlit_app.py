@@ -25,12 +25,7 @@ from colors import (
     tcac_colors,
     fire_risk_colors,
 )
-from ui_helpers import (
-    apply_embed_styles,
-    render_embed_debug,
-    render_subheader,
-    render_title,
-)
+from ui_helpers import apply_embed_styles, render_subheader, render_title
 
 
 # ============================================================================
@@ -44,7 +39,6 @@ try:
     params = st.query_params
 
     is_embedded = apply_embed_styles(params)
-    render_embed_debug(params, is_embedded)
 
     # Get project ID from query params
     project_id = params.get("project_id")
