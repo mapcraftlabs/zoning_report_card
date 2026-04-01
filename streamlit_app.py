@@ -25,6 +25,7 @@ from colors import (
     tcac_colors,
     fire_risk_colors,
 )
+from ui_helpers import apply_embed_styles
 
 
 # ============================================================================
@@ -36,6 +37,8 @@ st.set_page_config(page_title="Market-Feasible Units Dashboard", layout="wide")
 try:
     # Check for simulation ID parameters
     params = st.query_params
+
+    apply_embed_styles(params)
 
     # Get project ID from query params
     project_id = params.get("project_id")
