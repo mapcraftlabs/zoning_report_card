@@ -57,6 +57,14 @@ def apply_embed_styles(params) -> bool:
             border-radius: 0 !important;
             background: transparent !important;
         }
+
+        /* Hide header and footer in case embed=true doesn't catch them */
+        [data-testid="stHeader"],
+        [data-testid="stToolbar"],
+        [data-testid="stBottom"],
+        footer {
+            display: none !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
