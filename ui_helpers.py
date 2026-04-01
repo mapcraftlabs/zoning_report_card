@@ -7,10 +7,39 @@ from html import escape
 import streamlit as st
 
 
+def get_query_param_value(params, key: str, default: str = "") -> str:
+    """Return a query param as a normalized string."""
+    value = params.get(key, default)
+
+    if isinstance(value, list):
+        return str(value[0] if value else default).strip()
+
+    return str(value).strip()
+
+
 def is_embed_mode(params) -> bool:
     """Return whether the app is being rendered in embedded mode."""
-    embed_param = str(params.get("embed", params.get("embedded", "false"))).lower()
+    embed_param = get_query_param_value(params, "embed") or get_query_param_value(
+        params, "embedded", "false"
+    )
+    embed_param = embed_param.lower()
     return embed_param in {"1", "true", "yes"}
+
+
+def render_embed_debug(params, is_embedded: bool) -> None:
+    """Show the raw embed-related query param values for debugging."""
+    embed_value = get_query_param_value(params, "embed", "<missing>")
+    embedded_value = get_query_param_value(params, "embedded", "<missing>")
+
+    st.caption(
+        " | ".join(
+            [
+                f"embed={embed_value}",
+                f"embedded={embedded_value}",
+                f"detected_embed={is_embedded}",
+            ]
+        )
+    )
 
 
 def apply_embed_styles(params) -> bool:
