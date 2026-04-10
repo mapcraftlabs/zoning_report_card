@@ -157,11 +157,13 @@ def create_total_feasibility_chart_grouped(scenario_names, total_data_dict, colo
         margin=dict(l=0, r=20, t=30, b=30),
         showlegend=True,
         legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
+            title="",
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=-0.15,
+            font=dict(size=12),
         ),
     )
 
