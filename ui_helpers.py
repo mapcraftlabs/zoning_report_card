@@ -36,42 +36,12 @@ def apply_embed_styles(params) -> bool:
     st.markdown(
         """
         <style>
-        [data-testid="stAppViewContainer"] {
-            background: transparent;
-        }
-
-        [data-testid="stMainBlockContainer"] {
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-        }
-
         hr {
             display: none;
         }
 
-        /* Remove borders and rounded corners */
-        [data-testid="stVerticalBlockBorderWrapper"],
-        [data-testid="stVerticalBlock"],
-        [data-testid="stAppViewContainer"],
-        [data-testid="stMainBlockContainer"] {
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-        }
-
         .embed-title {
             font-size: 1.25rem;
-        }
-
-        /* Hide header, decoration stripe, and chart fullscreen button */
-        [data-testid="stHeader"],
-        [data-testid="stToolbar"],
-        [data-testid="stDecoration"],
-        [data-testid="stStatusWidget"],
-        [data-testid="stBottom"],
-        [data-testid="StyledFullScreenButton"] {
-            display: none !important;
-            visibility: hidden !important;
         }
         </style>
         """,
