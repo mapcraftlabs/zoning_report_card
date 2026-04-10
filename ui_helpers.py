@@ -72,7 +72,7 @@ def render_title(text: str, is_embedded: bool) -> None:
     if is_embedded:
         st.markdown(
             (
-                '<h3 style="font-size: 2.2rem; font-weight: 600; '
+                '<h3 style="font-size: 2.2rem !important; font-weight: 600; '
                 'margin: 0.25rem 0 0.5rem; line-height: 1.3;">'
                 f"{escape(text)}"
                 "</h3>"
