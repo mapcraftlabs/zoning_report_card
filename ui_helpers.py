@@ -5,6 +5,7 @@ UI helper functions for the Streamlit dashboard.
 from html import escape
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 def get_query_param_value(params, key: str, default: str = "") -> str:
@@ -79,6 +80,29 @@ def apply_embed_styles(params) -> bool:
         </style>
         """,
         unsafe_allow_html=True,
+    )
+
+    # CSS :has() may be stripped — use JS as a reliable fallback to hide the
+    # "Built with Streamlit / Fullscreen" oembed footer.
+    components.html(
+        """
+        <script>
+        function hideOembedFooter() {
+            const doc = window.parent.document;
+            doc.querySelectorAll('a[href*="utm_medium=oembed"]').forEach(a => {
+                let el = a;
+                while (el && el.parentElement && el.parentElement.tagName !== 'BODY') {
+                    el = el.parentElement;
+                }
+                if (el) el.style.display = 'none';
+            });
+        }
+        const observer = new MutationObserver(hideOembedFooter);
+        observer.observe(window.parent.document.documentElement, { childList: true, subtree: true });
+        hideOembedFooter();
+        </script>
+        """,
+        height=0,
     )
 
     return True
