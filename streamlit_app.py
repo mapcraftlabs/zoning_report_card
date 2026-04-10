@@ -146,7 +146,7 @@ if all_metadata and not is_embedded:
     st.markdown("---")
 
 # Chart 1: Feasibility Summary
-render_title("Feasibility Summary", is_embedded)
+render_title("Feasibility Summary2", is_embedded)
 total_data_dict = {"Total Units": [], "Net Units": [], "Affordable Units": []}
 scenario_names = []
 for i, data in enumerate(all_data):
