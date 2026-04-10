@@ -109,7 +109,8 @@ if not all_data:
     st.stop()
 
 # Display metadata table at the top
-render_title("Market-Feasible Units Dashboard", is_embedded)
+if not is_embedded:
+    render_title("Market-Feasible Units Dashboard", is_embedded)
 
 if all_metadata and not is_embedded:
     render_subheader("Simulation Details", is_embedded)
