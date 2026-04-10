@@ -33,21 +33,6 @@ def apply_embed_styles(params) -> bool:
     if not is_embedded:
         return False
 
-    st.markdown(
-        """
-        <style>
-        hr {
-            display: none;
-        }
-
-        .embed-title {
-            font-size: 1.25rem;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
     return True
 
 
