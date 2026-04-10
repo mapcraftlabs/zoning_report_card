@@ -49,12 +49,23 @@ def apply_embed_styles(params) -> bool:
             display: none;
         }
 
-        /* Hide header, decoration stripe, and footer */
+        /* Remove borders and rounded corners */
+        [data-testid="stVerticalBlockBorderWrapper"],
+        [data-testid="stVerticalBlock"],
+        [data-testid="stAppViewContainer"],
+        [data-testid="stMainBlockContainer"] {
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+
+        /* Hide header, decoration stripe, footer, and chart fullscreen button */
         [data-testid="stHeader"],
         [data-testid="stToolbar"],
         [data-testid="stDecoration"],
         [data-testid="stStatusWidget"],
         [data-testid="stBottom"],
+        [data-testid="StyledFullScreenButton"],
         footer {
             display: none !important;
             visibility: hidden !important;
@@ -72,7 +83,7 @@ def render_title(text: str, is_embedded: bool) -> None:
     if is_embedded:
         st.markdown(
             (
-                '<h3 style="font-size: 2.2rem !important; font-weight: 600; '
+                '<h3 style="font-size: 1.6rem !important; font-weight: 600; '
                 'margin: 0.25rem 0 0.5rem; line-height: 1.3;">'
                 f"{escape(text)}"
                 "</h3>"
