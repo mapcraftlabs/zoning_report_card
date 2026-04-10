@@ -60,7 +60,7 @@ def apply_embed_styles(params) -> bool:
         }
 
         .embed-title {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
         }
 
         /* Hide header, decoration stripe, footer, and chart fullscreen button */
