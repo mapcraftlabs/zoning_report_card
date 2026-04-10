@@ -296,7 +296,8 @@ if has_fire_data:
     st.markdown("---")
 
 # Summary of new development
-render_title("Summary of new development", is_embedded)
+if not is_embedded:
+    render_title("Summary of new development", is_embedded)
 
 # Chart 5: Units by Building Type
 render_title("New development by building type", is_embedded)
