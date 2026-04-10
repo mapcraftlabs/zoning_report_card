@@ -70,7 +70,9 @@ def apply_embed_styles(params) -> bool:
         [data-testid="stStatusWidget"],
         [data-testid="stBottom"],
         [data-testid="StyledFullScreenButton"],
-        footer {
+        footer,
+        div:has(> a[href*="utm_medium=oembed"]),
+        div:has(a[href*="utm_medium=oembed"]) {
             display: none !important;
             visibility: hidden !important;
         }
