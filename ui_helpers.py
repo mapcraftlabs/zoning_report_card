@@ -59,6 +59,10 @@ def apply_embed_styles(params) -> bool:
             box-shadow: none !important;
         }
 
+        .embed-title {
+            font-size: 1.1rem;
+        }
+
         /* Hide header, decoration stripe, footer, and chart fullscreen button */
         [data-testid="stHeader"],
         [data-testid="stToolbar"],
@@ -83,7 +87,7 @@ def render_title(text: str, is_embedded: bool) -> None:
     if is_embedded:
         st.markdown(
             (
-                '<div style="font-size: 1.1rem; font-weight: 600; '
+                '<div class="embed-title" style="font-weight: 600; '
                 'margin: 0.25rem 0 0.5rem; line-height: 1.3;">'
                 f"{escape(text)}"
                 "</div>"
