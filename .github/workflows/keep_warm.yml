@@ -12,6 +12,6 @@ jobs:
         with:
           node-version: '20'
       - name: Install Playwright
-        run: npx playwright install chromium --with-deps
+        run: npm install playwright && npx playwright install chromium --with-deps
       - name: Wake Streamlit app
         run: node .github/scripts/wake_app.js
