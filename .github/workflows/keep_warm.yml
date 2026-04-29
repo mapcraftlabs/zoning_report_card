@@ -2,6 +2,7 @@ name: Keep App Warm
 on:
   schedule:
     - cron: '0 * * * *' # Once an hour
+  workflow_dispatch:
 jobs:
   keep_warm:
     runs-on: ubuntu-latest
