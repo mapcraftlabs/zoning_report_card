@@ -7,5 +7,11 @@ jobs:
   keep_warm:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Streamlit app
-        run: curl -s -L -o /dev/null -w "%{http_code}" "https://zoning-report-card.streamlit.app/"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright
+        run: npx playwright install chromium --with-deps
+      - name: Wake Streamlit app
+        run: node .github/scripts/wake_app.js
