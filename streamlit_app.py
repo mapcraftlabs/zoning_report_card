@@ -55,8 +55,12 @@ try:
     # Split by comma if multiple IDs are provided
     simulation_ids = [sid.strip() for sid in simulation_ids_param.split(",")]
 
+    # Allow ?dev=1 (or any truthy value) in the URL to hit the dev API
+    use_dev = params.get("dev") in ("1", "true", "True", "yes")
+    api_host = "api-dev.mapcraft.io" if use_dev else "api.mapcraft.io"
+
     # Fetch data from API
-    api_response = fetch_data_from_api(simulation_ids, project_id)
+    api_response = fetch_data_from_api(simulation_ids, project_id, api_host=api_host)
     if not api_response:
         st.error(
             "Failed to fetch data from API. Please check your simulation IDs and try again."

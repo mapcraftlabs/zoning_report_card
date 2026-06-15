@@ -6,19 +6,20 @@ import streamlit as st
 import requests
 
 
-def fetch_data_from_api(simulation_ids, project_id):
+def fetch_data_from_api(simulation_ids, project_id, api_host="api.mapcraft.io"):
     """
     Fetch aggregation data from the MapCraft API for multiple simulation IDs.
 
     Args:
         simulation_ids: List of simulation IDs to fetch
         project_id: The project ID to fetch data for
+        api_host: API hostname (default: api.mapcraft.io; pass api-dev.mapcraft.io for dev)
 
     Returns:
         Dictionary containing the CSV data or None if error
     """
     try:
-        url = f"https://api.mapcraft.io/simulations/aggregations_data/{project_id}"
+        url = f"https://{api_host}/simulations/aggregations_data/{project_id}"
         response = requests.post(
             url, json={"simulation_ids": simulation_ids}, timeout=30
         )
